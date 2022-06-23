@@ -1,11 +1,11 @@
-import { b64tohex, hex2b64 } from "./lib/jsbn/base64";
-import { JSEncryptRSAKey } from "./JSEncryptRSAKey";
-import version from './version.json';
+import { b64tohex, hex2b64 } from "./lib/jsbn/base64"
+import { JSEncryptRSAKey } from "./JSEncryptRSAKey"
+import version from './version.json'
 
 export interface IJSEncryptOptions {
-    default_key_size?:string;
-    default_public_exponent?:string;
-    log?:boolean;
+    default_key_size?: string
+    default_public_exponent?: string
+    log?: boolean
 }
 
 /**
@@ -18,20 +18,20 @@ export interface IJSEncryptOptions {
  * @constructor
  */
 export class JSEncrypt {
-    constructor(options:IJSEncryptOptions = {}) {
-        options = options || {};
-        this.default_key_size = options.default_key_size ? parseInt(options.default_key_size, 10) : 1024;
-        this.default_public_exponent = options.default_public_exponent || "010001"; // 65537 default openssl public exponent for rsa key type
-        this.log = options.log || false;
+    constructor(options: IJSEncryptOptions = {}) {
+        options = options || {}
+        this.default_key_size = options.default_key_size ? parseInt(options.default_key_size, 10) : 1024
+        this.default_public_exponent = options.default_public_exponent || "010001" // 65537 default openssl public exponent for rsa key type
+        this.log = options.log || false
         // The private and public key.
-        this.key = null;
+        this.key = null
     }
 
-    private default_key_size:number;
-    private default_public_exponent:string;
-    private log:boolean;
-    private key:JSEncryptRSAKey;
-    public static version:string = version.version;
+    private default_key_size: number
+    private default_public_exponent: string
+    private log: boolean
+    private key: JSEncryptRSAKey
+    public static version: string = version.version;
 
     /**
      * Method to set the rsa key parameter (one method is enough to set both the public
@@ -40,11 +40,11 @@ export class JSEncrypt {
      * @param {Object|string} key the pem encoded string or an object (with or without header/footer)
      * @public
      */
-    public setKey(key:string) {
+    public setKey(key: string) {
         if (this.log && this.key) {
-            console.warn("A key was already set, overriding existing.");
+            console.warn("A key was already set, overriding existing.")
         }
-        this.key = new JSEncryptRSAKey(key);
+        this.key = new JSEncryptRSAKey(key)
     }
 
     /**
@@ -52,9 +52,9 @@ export class JSEncrypt {
      * @see setKey
      * @public
      */
-    public setPrivateKey(privkey:string) {
+    public setPrivateKey(privkey: string) {
         // Create the key.
-        this.setKey(privkey);
+        this.setKey(privkey)
     }
 
     /**
@@ -62,9 +62,9 @@ export class JSEncrypt {
      * @see setKey
      * @public
      */
-    public setPublicKey(pubkey:string) {
+    public setPublicKey(pubkey: string) {
         // Sets the public key.
-        this.setKey(pubkey);
+        this.setKey(pubkey)
     }
 
     /**
@@ -75,12 +75,12 @@ export class JSEncrypt {
      * @return {string} the decrypted string
      * @public
      */
-    public decrypt(str:string) {
+    public decrypt(str: string) {
         // Return the decrypted string.
         try {
-            return this.getKey().decrypt(b64tohex(str));
+            return this.getKey().decrypt(b64tohex(str))
         } catch (ex) {
-            return false;
+            return false
         }
     }
 
@@ -92,12 +92,12 @@ export class JSEncrypt {
      * @return {string} the encrypted string encoded in base64
      * @public
      */
-    public encrypt(str:string) {
+    public encrypt(str: string) {
         // Return the encrypted string.
         try {
-            return hex2b64(this.getKey().encrypt(str));
+            return hex2b64(this.getKey().encrypt(str))
         } catch (ex) {
-            return false;
+            return false
         }
     }
 
@@ -109,12 +109,12 @@ export class JSEncrypt {
      * @return {string} the signature encoded in base64
      * @public
      */
-    public sign(str:string, digestMethod:(str:string) => string, digestName:string):string|false {
+    public sign(str: string, digestMethod: (str: string) => string, digestName: string): string | false {
         // return the RSA signature of 'str' in 'hex' format.
         try {
-            return hex2b64(this.getKey().sign(str, digestMethod, digestName));
+            return hex2b64(this.getKey().sign(str, digestMethod, digestName))
         } catch (ex) {
-            return false;
+            return false
         }
     }
 
@@ -126,12 +126,12 @@ export class JSEncrypt {
      * @return {boolean} whether the data and signature match
      * @public
      */
-    public verify(str:string, signature:string, digestMethod:(str:string) => string):boolean {
+    public verify(str: string, signature: string, digestMethod: (str: string) => string): boolean {
         // Return the decrypted 'digest' of the signature.
         try {
-            return this.getKey().verify(str, b64tohex(signature), digestMethod);
+            return this.getKey().verify(str, b64tohex(signature), digestMethod)
         } catch (ex) {
-            return false;
+            return false
         }
     }
 
@@ -143,19 +143,19 @@ export class JSEncrypt {
      * @returns {JSEncryptRSAKey} the JSEncryptRSAKey object
      * @public
      */
-    public getKey(cb?:() => void) {
+    public getKey(cb?: () => void) {
         // Only create new if it does not exist.
         if (!this.key) {
             // Get a new private key.
-            this.key = new JSEncryptRSAKey();
+            this.key = new JSEncryptRSAKey()
             if (cb && {}.toString.call(cb) === "[object Function]") {
-                this.key.generateAsync(this.default_key_size, this.default_public_exponent, cb);
-                return;
+                this.key.generateAsync(this.default_key_size, this.default_public_exponent, cb)
+                return
             }
             // Generate the key.
-            this.key.generate(this.default_key_size, this.default_public_exponent);
+            this.key.generate(this.default_key_size, this.default_public_exponent)
         }
-        return this.key;
+        return this.key
     }
 
     /**
@@ -166,7 +166,7 @@ export class JSEncrypt {
      */
     public getPrivateKey() {
         // Return the private representation of this key.
-        return this.getKey().getPrivateKey();
+        return this.getKey().getPrivateKey()
     }
 
     /**
@@ -177,7 +177,7 @@ export class JSEncrypt {
      */
     public getPrivateKeyB64() {
         // Return the private representation of this key.
-        return this.getKey().getPrivateBaseKeyB64();
+        return this.getKey().getPrivateBaseKeyB64()
     }
 
 
@@ -189,7 +189,7 @@ export class JSEncrypt {
      */
     public getPublicKey() {
         // Return the private representation of this key.
-        return this.getKey().getPublicKey();
+        return this.getKey().getPublicKey()
     }
 
     /**
@@ -200,6 +200,68 @@ export class JSEncrypt {
      */
     public getPublicKeyB64() {
         // Return the private representation of this key.
-        return this.getKey().getPublicBaseKeyB64();
+        return this.getKey().getPublicBaseKeyB64()
     }
+
+
+    public encryptLong(str: any) {
+        let k: any = this.getKey()
+
+        let maxLength = k.n.bitLength() / 8 - 11
+
+        try {
+            let lt: any = ""
+
+            let ct = ""
+
+            if (str.length > maxLength) {
+                lt = str.match(/.{1,245}/g)
+
+                lt.forEach(function (entry: any) {
+                    var t1 = k.encrypt(entry)
+
+                    ct += t1
+                })
+
+                return hex2b64(ct)
+            }
+
+            var t = k.encrypt(str)
+
+            var y = hex2b64(t)
+
+            return y
+        } catch (ex) {
+            return false
+        }
+    };
+    public decryptLong(str: any) {
+        let k: any = this.getKey()
+
+        let maxLength = k.n.bitLength() / 8
+
+        try {
+            let s = b64tohex(str)
+            let ct = ""
+
+            if (s.length > maxLength) {
+                var lt = s.match(/.{1,512}/g)
+
+                lt.forEach(function (entry) {
+                    var t1 = k.decrypt(entry)
+
+                    ct += t1
+                })
+
+                return ct
+            }
+
+            var y = k.decrypt(b64tohex(s))
+
+            return y
+        } catch (ex) {
+            console.log(ex)
+            return false
+        }
+    };
 }

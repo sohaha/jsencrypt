@@ -113,4 +113,6 @@ export declare class JSEncrypt {
      * @public
      */
     getPublicKeyB64(): string;
+    encryptLong(str: any): string | false;
+    decryptLong(str: any): any;
 }
