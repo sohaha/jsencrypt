@@ -114,5 +114,7 @@ export declare class JSEncrypt {
      */
     getPublicKeyB64(): string;
     encryptLong(str: any): string | false;
+    base64ToArrayBuffer(base64: string): Uint8Array;
+    bytesToHex(bytes: any): string;
     decryptLong(str: any): any;
 }

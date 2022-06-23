@@ -215,8 +215,7 @@ export class JSEncrypt {
             let ct = ""
 
             if (str.length > maxLength) {
-                lt = str.match(/.{1,245}/g)
-
+                lt = str.match(RegExp(".{1," + maxLength + "}", "g"))
                 lt.forEach(function (entry: any) {
                     var t1 = k.encrypt(entry)
 
@@ -235,28 +234,50 @@ export class JSEncrypt {
             return false
         }
     };
+
+    public base64ToArrayBuffer(base64: string) {
+        let binary_string = window.atob(base64)
+        let len = binary_string.length
+        let bytes = new Uint8Array(len)
+        for (let i = 0; i < len; i++) {
+            bytes[i] = binary_string.charCodeAt(i)
+        }
+
+        return bytes
+    }
+    public bytesToHex(bytes: any) {
+        let hex = []
+        for (let i = 0; i < bytes.length; i++) {
+            hex.push((bytes[i] >>> 4).toString(16))
+            hex.push((bytes[i] & 0xF).toString(16))
+        }
+        return hex.join("")
+    }
+
     public decryptLong(str: any) {
         let k: any = this.getKey()
-
         let maxLength = k.n.bitLength() / 8
 
         try {
-            let s = b64tohex(str)
+            let s = this.base64ToArrayBuffer(str)
             let ct = ""
-
             if (s.length > maxLength) {
-                var lt = s.match(/.{1,512}/g)
+                let offSet = maxLength
+                while (true) {
+                    if (s.length <= offSet) {
+                        break
+                    }
+                    let bufTmp = s.slice(0, offSet)
 
-                lt.forEach(function (entry) {
-                    var t1 = k.decrypt(entry)
-
+                    offSet = offSet + maxLength
+                    let t1 = k.decrypt(this.bytesToHex(bufTmp))
                     ct += t1
-                })
+                }
 
                 return ct
             }
 
-            var y = k.decrypt(b64tohex(s))
+            var y = k.decrypt(b64tohex(str))
 
             return y
         } catch (ex) {
